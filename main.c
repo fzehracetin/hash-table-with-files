@@ -22,7 +22,7 @@ void initializeHash( ht* hashTable, long long int M) {
 }
 
 int hash(long long int key, int i, long long int M) {
-	return (key % M) + i * (1 + key % MM);
+	return ((key % M) + i * (1 + key % MM)) % M;
 }
 
 FILE* open_file(char* fname, char* dir) {
@@ -99,7 +99,7 @@ void insert_from_dir (int key, char* fname, ht* hashTable, long long int M) {
 	int adr, i = 0;
 	adr = hash(key, i, M);
 	
-	while( ( hashTable[adr].name[0] != '\0')  && (i < M) ) {
+	while( (i < M) && ( hashTable[adr].name[0] != '\0') ) {
 		i++;
 		adr = hash(key, i, M);
 	}
@@ -115,17 +115,17 @@ void insert_from_dir (int key, char* fname, ht* hashTable, long long int M) {
 }
 
 long long int file_hasher (char* fname, char* dir, long long int M, ht* hashTable) {
-	char ch;
-	int n = 0, i = 0;
+	char ch, kelime[MIN];
+	int n = 0, m = 0, j = 0;
 	long long int key = 0;
 	
 	FILE* f1 = open_file(fname, dir);
 	if (f1 == NULL) {
 		return -1;
 	}
-	
 	ch = getc(f1);
 	while( ch != EOF) { // file uzunlugunu olc
+		printf("%c", ch);
 		n++; 
 		ch = getc(f1);
 	}
@@ -133,17 +133,28 @@ long long int file_hasher (char* fname, char* dir, long long int M, ht* hashTabl
 	
 	fseek(f1, 0, SEEK_SET); 
 	ch = getc(f1);
-	i = 0;
 	while ( ch != EOF) { 
-		key += (long long int) (ch * powl(R, n - i - 1)) % (long long int) M; //
+		m = 0;
+		while((ch != EOF) && (ch != ' ') && (ch != '\n')) {
+			kelime[m] = ch;
+			m++;
+			ch = getc(f1);
+		}
+		if ((ch == ' ') || (ch == '\n') ){
+			kelime[m] = ch;
+			m++;
+		} kelime[m] = '\0';
+		printf("%s", kelime);
+		for(j = 0; j < m; j++) {
+			key += (long long int) (kelime[j] * powl(R, m - j - 1)) % (long long int) M; 
+		}
 		ch = getc(f1);
-		i++;
-	} 	
+	}printf("\n");
 	printf("%s dosyasinin key degeri: %llu \n", fname, key);
 	return key;
 }
 
-void copy_to_dir(char* fname, char* dir1, char* dir2) {
+void copy_to_dir (char* fname, char* dir1, char* dir2) {
 	FILE *f1, *f2;
 	char dummy[30], ch;
 	
@@ -171,6 +182,8 @@ void file_to_table (char* fname, char* dir1, char* dir2, long long int M, ht* ha
 	char dummy[30];
 	
 	key = file_hasher(fname, dir1, M, hashTable);
+	if (key == -1) 
+		return;
 	sonuc = insert_file(key, fname, dir1, dir2, hashTable, M);
 	
 	if (sonuc) {
@@ -190,7 +203,7 @@ void file_to_table (char* fname, char* dir1, char* dir2, long long int M, ht* ha
 	}
 }
 
-void read_dir(char* dir, long long int M, ht* hashTable) {
+void read_dir (char* dir, long long int M, ht* hashTable) {
 	char fname[MAX];
 	FILE *f1;
 	long long int key = 0;
@@ -207,7 +220,7 @@ void read_dir(char* dir, long long int M, ht* hashTable) {
 	fclose(f1);
 }
 
-void print_hash(ht* hashTable, long long int M) {
+void print_hash (ht* hashTable, long long int M) {
 	int i;
 	for(i = 0; i < M; i++) {
 		printf("hashTable[%d]: %s \n", i, hashTable[i].name);

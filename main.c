@@ -13,8 +13,7 @@ typedef struct {
 } ht;
 
 void initializeHash( ht* hashTable, long long int M) {
-	int i;
-	
+	int i;	
 	for (i = 0; i < M; i++) {
 		hashTable[i].name = (char*) calloc(MAX, sizeof(char));
 		hashTable[i].name[0] = '\0';
@@ -52,7 +51,6 @@ int compare_files(char* fname1, char* fname2, char* dir1, char* dir2) {
 	int flag = 0;
 	f1 = open_file(fname1, dir1);
 	f2 = open_file(fname2, dir2);
-	
 	fscanf(f1, "%s", line1);
 	fscanf(f2, "%s", line2);
 	
@@ -61,7 +59,7 @@ int compare_files(char* fname1, char* fname2, char* dir1, char* dir2) {
 	} 
 	while((!flag) && (fscanf(f1, "%s", line1) != EOF) && (fscanf(f2, "%s", line2) != EOF));
 	
-	if ((!flag)) 
+	if (!flag) 
 		return 1; // dosyalar ayniysa 1 return eder
 	else
 		return 0;
@@ -125,7 +123,7 @@ long long int file_hasher (char* fname, char* dir, long long int M, ht* hashTabl
 	}
 	ch = getc(f1);
 	while( ch != EOF) { // file uzunlugunu olc
-		printf("%c", ch);
+		// printf("%c", ch);
 		n++; 
 		ch = getc(f1);
 	}
@@ -140,11 +138,12 @@ long long int file_hasher (char* fname, char* dir, long long int M, ht* hashTabl
 			m++;
 			ch = getc(f1);
 		}
-		if ((ch == ' ') || (ch == '\n') ){
+		while ((ch != EOF) && ((ch == ' ') || (ch == '\n')) ){
 			kelime[m] = ch;
 			m++;
+			ch = getc(f1);
 		} kelime[m] = '\0';
-		printf("%s", kelime);
+		// printf("%s", kelime);
 		for(j = 0; j < m; j++) {
 			key += (long long int) (kelime[j] * powl(R, m - j - 1)) % (long long int) M; 
 		}
@@ -254,8 +253,7 @@ int main(int argc, char **argv)
 					printf("Dosyalari iceren yolu giriniz: ");
 					scanf("%s", dir1);
 					printf("\n");
-					read_dir(dir1, M, hashTable);
-					
+					read_dir(dir1, M, hashTable);					
 					printf("\nPress 0 to return the menu: ");
 					scanf("%d", &out);
 				} while(out != 0);
@@ -288,8 +286,4 @@ int main(int argc, char **argv)
 		}
 		
 	} while(fonk != 3);
-    
-	
-	
-	
 }
